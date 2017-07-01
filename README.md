@@ -1,2 +1,2 @@
-# BomtAnts-backend
-blow your frants away
+# BombAnts-backend
+blow your (fr)ants away
