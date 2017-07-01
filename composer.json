@@ -11,8 +11,12 @@
     },
     "authors": [
         {
-            "name": "Mathijs",
-            "email": "bombants@mcorten.nl"
+            "name": "Mathijs Corten",
+            "email": "mathijs@bombants.nl"
+        },
+        {
+            "name": "Mark Teunissen",
+            "email": "mark@bombants.nl"
         }
     ]
 }
