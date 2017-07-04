@@ -2,20 +2,20 @@
 
 namespace bombants\backend\models;
 
-use bombants\backend\value\Token;
+use bombants\backend\value\TokenValue;
 
 class Player
 {
     /** @var  int $id */
     private $id = null;
 
-    /** @var  Token $token */
+    /** @var  TokenValue $token */
     private $token = null;
 
     /**
-     * @param Token $token
+     * @param TokenValue $token
      */
-    public function setToken(Token $token)
+    public function setToken(TokenValue $token)
     {
         $this->token = $token;
     }
@@ -29,9 +29,9 @@ class Player
     }
 
     /**
-     * @return Token
+     * @return TokenValue
      */
-    public function getToken(): Token
+    public function getToken(): TokenValue
     {
         return $this->token;
     }
@@ -41,9 +41,9 @@ class Player
         $this->id = $id;
     }
 
-    public function isAuthenticated(Token $token)
+    public function isAuthenticated(TokenValue $token)
     {
-        if (!$this->token instanceof Token) {
+        if (!$this->token instanceof TokenValue) {
             return false;
         }
         return $this->token->equalsToken($token);

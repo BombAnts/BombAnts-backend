@@ -2,10 +2,7 @@
 
 namespace bombants\backend\value;
 
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
-
-class TokenNull extends Token
+class TokenNull implements Token
 {
     public function getValue()
     {

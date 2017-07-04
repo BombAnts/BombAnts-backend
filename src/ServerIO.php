@@ -12,9 +12,10 @@ namespace bombants\backend;
 use bombants\backend\models\Player;
 use bombants\backend\responses\Authenticated;
 use bombants\backend\responses\AuthenticatedAlready;
-use bombants\backend\responses\MessageInvalid;
 use bombants\backend\responses\AuthenticatedNot;
-use bombants\backend\value\Token;
+use bombants\backend\responses\MessageInvalid;
+use bombants\backend\value\TokenNull;
+use bombants\backend\value\TokenValue;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 
@@ -63,8 +64,9 @@ class ServerIO implements MessageComponentInterface
 
         $player = $this->server->getPlayer($from->resourceId);
 
-        $token = !empty($msg->token) ? $msg->token : null;
-        $token = Token::fromString($token);
+        $token = !empty($msg->token) ?
+            TokenValue::fromString($msg->token) :
+            new TokenNull();
 
         if ($msg->path === '/login') {
             if ($player->isAuthenticated($token)) {
@@ -73,7 +75,7 @@ class ServerIO implements MessageComponentInterface
                 return;
             }
 
-            $player->setToken(Token::random());
+            $player->setToken(TokenValue::random());
             $response = new Authenticated($player);
             $from->send((string)$response);
             return;
