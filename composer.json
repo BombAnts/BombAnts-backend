@@ -2,13 +2,6 @@
     "name": "bombants/bombants-backend",
     "description": "Blow your (fr)ants away",
     "type": "project",
-    "require": {
-    	"php":"7",
-        "cboden/ratchet": "^0.3.5"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^6.2"
-    },
     "authors": [
         {
             "name": "Mathijs Corten",
@@ -18,5 +11,18 @@
             "name": "Mark Teunissen",
             "email": "mark@bombants.nl"
         }
-    ]
+    ],
+    "autoload" : {
+        "psr-4": {
+            "bombants\\backend\\" : "src/"
+        }
+    },
+    "require": {
+        "php":"^7.0",
+        "cboden/ratchet": "^0.3.5",
+        "ramsey/uuid": "^3.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.2"
+    }
 }
