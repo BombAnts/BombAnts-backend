@@ -9,6 +9,7 @@
 namespace bombants\backend;
 
 
+use bombants\backend\models\Game;
 use bombants\backend\models\Player;
 use bombants\backend\responses\Authenticated;
 use bombants\backend\responses\AuthenticatedAlready;
@@ -24,6 +25,9 @@ class ServerIO implements MessageComponentInterface
 
     private $server = null;
 
+    /** @var Game[] $games */
+    private $games = [];
+
     public function __construct(Server $server)
     {
         $this->server = $server;
@@ -33,7 +37,7 @@ class ServerIO implements MessageComponentInterface
     {
         echo 'Connection opened'.PHP_EOL;
 
-        $player = new Player($conn->resourceId);
+        $player = new Player($conn, $conn->resourceId);
         $this->server->addPlayer($player);
     }
 
@@ -87,6 +91,23 @@ class ServerIO implements MessageComponentInterface
             return;
         }
 
+        if ($msg->path === '/games') {
+            $result = [];
+            foreach($this->games as $game) {
+                $result[] = [
+                    'id' => $game->getId(),
+                    'name' => $game->getName(),
+                    'amountPlayers' => $game->getAmountOfPlayers(),
+                    'maxPlayers' => $game->getMaxPlayers(),
+                ];
+            }
+        }
+
+        if ($msg->path === '/games/create') {
+            $game = new Game('test');
+            $this->games[$game->getId()] = $game;
+            $player->joinGame($game);
+        }
 
         echo 'Connection message: '.PHP_EOL;
         var_dump($from->resourceId);
