@@ -14,6 +14,8 @@ use bombants\backend\models\Player;
 use bombants\backend\responses\Authenticated;
 use bombants\backend\responses\AuthenticatedAlready;
 use bombants\backend\responses\AuthenticatedNot;
+use bombants\backend\responses\GameCreated;
+use bombants\backend\responses\GameCreateInvalid;
 use bombants\backend\responses\MessageInvalid;
 use bombants\backend\value\TokenNull;
 use bombants\backend\value\TokenValue;
@@ -73,7 +75,7 @@ class ServerIO implements MessageComponentInterface
             new TokenNull();
 
         if ($msg->path === '/login') {
-            if ($player->isAuthenticated($token)) {
+            if ($token instanceof TokenValue && $player->isAuthenticated($token)) {
                 $response = new AuthenticatedAlready();
                 $from->send((string)$response);
                 return;
@@ -85,28 +87,43 @@ class ServerIO implements MessageComponentInterface
             return;
         }
 
-        if (!$player->isAuthenticated($token)) {
+        if (!$token instanceof TokenValue || !$player->isAuthenticated($token)) {
             $response = new AuthenticatedNot();
             $from->send((string)$response);
             return;
         }
 
         if ($msg->path === '/games') {
-            $result = [];
+            $result = [
+                'event' => 'game.list',
+                'data' => []
+            ];
             foreach($this->games as $game) {
-                $result[] = [
-                    'id' => $game->getId(),
+                $result['data'][] = [
+                    'id' => (string)$game->getId(),
                     'name' => $game->getName(),
                     'amountPlayers' => $game->getAmountOfPlayers(),
                     'maxPlayers' => $game->getMaxPlayers(),
                 ];
             }
+            $from->send(json_encode($result));
+            return;
         }
 
         if ($msg->path === '/games/create') {
-            $game = new Game('test');
-            $this->games[$game->getId()] = $game;
+            if (empty($msg->data->name)) {
+                $response = new GameCreateInvalid();
+                $from->send((string)$response);
+                return;
+            }
+
+            $game = new Game($msg->data->name);
+            $this->games[] = $game;
             $player->joinGame($game);
+
+            $response = new GameCreated($game);
+            $from->send((string)$response);
+            return;
         }
 
         echo 'Connection message: '.PHP_EOL;

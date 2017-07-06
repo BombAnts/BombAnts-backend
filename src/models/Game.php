@@ -54,7 +54,7 @@ class Game
 
     public function addPlayer(Player $player)
     {
-
+        $this->players[] = $player;
     }
 
     public function removePlayer(Player $player)

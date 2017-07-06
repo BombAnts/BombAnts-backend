@@ -41,6 +41,11 @@ class Server
     {
         return $this->players[$id];
     }
+
+    public function getPlayerCount()
+    {
+        return count($this->players);
+    }
 }
 
 
