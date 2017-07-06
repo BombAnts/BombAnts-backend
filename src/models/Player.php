@@ -3,6 +3,7 @@
 namespace bombants\backend\models;
 
 use bombants\backend\responses\Response;
+use bombants\backend\value\Token;
 use bombants\backend\value\TokenValue;
 use Ratchet\ConnectionInterface;
 
@@ -70,7 +71,7 @@ class Player
         $this->id = $id;
     }
 
-    public function isAuthenticated(TokenValue $token)
+    public function isAuthenticated(Token $token)
     {
         if (!$this->token instanceof TokenValue) {
             return false;

@@ -75,7 +75,7 @@ class ServerIO implements MessageComponentInterface
             new TokenNull();
 
         if ($msg->path === '/login') {
-            if ($token instanceof TokenValue && $player->isAuthenticated($token)) {
+            if ($player->isAuthenticated($token)) {
                 $response = new AuthenticatedAlready();
                 $from->send((string)$response);
                 return;
@@ -87,7 +87,7 @@ class ServerIO implements MessageComponentInterface
             return;
         }
 
-        if (!$token instanceof TokenValue || !$player->isAuthenticated($token)) {
+        if (!$player->isAuthenticated($token)) {
             $response = new AuthenticatedNot();
             $from->send((string)$response);
             return;
