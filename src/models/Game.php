@@ -9,13 +9,20 @@ class Game
     // config
     private $maxPlayers = 8;
 
-    /** @var  Player[] $players */
-    private $players;
-
     /** @var  TokenValue $id */
     private $id;
 
+    /** @var string $name */
     private $name;
+
+    /** @var  GameBoard $board */
+    private $board;
+
+    /** @var  Player $master */
+    private $master;
+
+    /** @var  GamePlayer[] $players */
+    private $players;
 
     /**
      * @return TokenValue
@@ -46,19 +53,27 @@ class Game
         return count($this->players);
     }
 
-    public function __construct(string $name)
+    public function __construct(Player $player, string $name)
     {
         $this->id = TokenValue::random();
+        $this->master = $player;
         $this->name = $name;
+        $this->board = new GameBoardBasic();
     }
 
     public function addPlayer(Player $player)
     {
-        $this->players[] = $player;
+        $this->players[] = new GamePlayer($player);
     }
 
     public function removePlayer(Player $player)
     {
 
+    }
+
+    public function start()
+    {
+        // TODO set random start positions
+        // Start the game
     }
 }
