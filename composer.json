@@ -2,15 +2,16 @@
     "name": "bombants/bombants-backend",
     "description": "Blow your (fr)ants away",
     "type": "project",
-    "authors": [
-        {
-            "name": "Mathijs Corten",
-            "email": "mathijs@bombants.nl"
-        },
-        {
-            "name": "Mark Teunissen",
-            "email": "mark@bombants.nl"
-        }
+    "author": "BombAnts",
+    "contributors": [
+      {
+        "name": "Mark Teunissen",
+        "email": "mark@bombants.nl"
+      },
+      {
+        "name": "Mathijs Corten",
+        "email": "mathijs@bombants.nl"
+      }
     ],
     "autoload" : {
         "psr-4": {
