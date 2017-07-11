@@ -39,7 +39,7 @@ class GameBoardBasic implements GameBoard
         for ($i = 1; $i <= $this->maxPlayers; $i++) {
             $x = rand(1,self::MAX_X);
             $y = rand(1,self::MAX_Y);
-            $location = new Location(this, $x, $y);
+            $location = new Location($this, $x, $y);
             $this->spawnLocations[$i] = $location;
         }
     }

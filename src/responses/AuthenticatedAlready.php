@@ -22,7 +22,6 @@ class AuthenticatedAlready
             'event' => $this->event,
             'hint' => $this->hint
         ]);
-        $message = stripslashes($message);
         return $message;
     }
 }

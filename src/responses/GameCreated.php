@@ -33,7 +33,6 @@ class GameCreated implements Response
                 'id' => (string)$this->game->getId(),
             ]
         ]);
-        $message = stripslashes($message);
         return $message;
     }
 }

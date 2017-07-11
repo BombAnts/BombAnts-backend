@@ -117,7 +117,7 @@ class ServerIO implements MessageComponentInterface
                 return;
             }
 
-            $game = new Game($msg->data->name);
+            $game = new Game($player, $msg->data->name);
             $this->games[] = $game;
             $player->joinGame($game);
 
