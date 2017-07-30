@@ -54,7 +54,7 @@ class ServerIO implements MessageComponentInterface
     {
         $msg = json_decode($msg);
         $playerId = !empty($msg->id) ? $msg->id : null;
-        var_dump($msg);
+
         // if the message can not be decoded
         if (false === is_object($msg)) {
             $from->send((string)new MessageInvalid());
