@@ -28,10 +28,7 @@ class GameCreated implements Response
         $message = json_encode([
             'code' => $this->code,
             'event' => $this->event,
-            'game' => [
-                'name' => $this->game->getName(),
-                'id' => (string)$this->game->getId(),
-            ]
+            'game' => $this->game->__toArray(),
         ]);
         return $message;
     }

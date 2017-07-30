@@ -18,7 +18,7 @@ class Game
     /** @var  GameBoard $board */
     private $board;
 
-    /** @var  Player $master */
+    /** @var  PlayerAuthenticated $master */
     private $master;
 
     /** @var  GamePlayer[] $players */
@@ -53,7 +53,7 @@ class Game
         return count($this->players);
     }
 
-    public function __construct(Player $player, string $name)
+    public function __construct(PlayerAuthenticated $player, string $name)
     {
         $this->id = TokenValue::random();
         $this->master = $player;
@@ -61,12 +61,12 @@ class Game
         $this->board = new GameBoardBasic();
     }
 
-    public function addPlayer(Player $player)
+    public function addPlayer(PlayerAuthenticated $player)
     {
         $this->players[] = new GamePlayer($player);
     }
 
-    public function removePlayer(Player $player)
+    public function removePlayer(PlayerAuthenticated $player)
     {
 
     }
@@ -75,5 +75,14 @@ class Game
     {
         // TODO set random start positions
         // Start the game
+    }
+
+    public function __toArray()
+    {
+        return [
+            'id' => (string)$this->getId(),
+            'name' => $this->getName(),
+            'master' => $this->master->__toArray(),
+        ];
     }
 }

@@ -10,7 +10,7 @@ namespace bombants\backend;
 
 
 use bombants\backend\models\Game;
-use bombants\backend\models\Player;
+use bombants\backend\models\PlayerAuthenticated;
 use bombants\backend\responses\Authenticated;
 use bombants\backend\responses\AuthenticatedAlready;
 use bombants\backend\responses\AuthenticatedNot;
@@ -38,9 +38,6 @@ class ServerIO implements MessageComponentInterface
     function onOpen(ConnectionInterface $conn)
     {
         echo 'Connection opened'.PHP_EOL;
-
-        $player = new Player($conn, $conn->resourceId);
-        $this->server->addPlayer($player);
     }
 
     function onClose(ConnectionInterface $conn)
@@ -56,7 +53,8 @@ class ServerIO implements MessageComponentInterface
     function onMessage(ConnectionInterface $from, $msg)
     {
         $msg = json_decode($msg);
-
+        $playerId = !empty($msg->id) ? $msg->id : null;
+        var_dump($msg);
         // if the message can not be decoded
         if (false === is_object($msg)) {
             $from->send((string)new MessageInvalid());
@@ -68,7 +66,7 @@ class ServerIO implements MessageComponentInterface
             return;
         }
 
-        $player = $this->server->getPlayer($from->resourceId);
+        $player = $this->server->getPlayer($playerId);
 
         $token = !empty($msg->token) ?
             TokenValue::fromString($msg->token) :
@@ -81,9 +79,16 @@ class ServerIO implements MessageComponentInterface
                 return;
             }
 
-            $player->setToken(TokenValue::random());
+            $player = new PlayerAuthenticated($from, $msg->data->name);
+            $this->server->addPlayer($player);
+
             $response = new Authenticated($player);
             $from->send((string)$response);
+            return;
+        }
+
+        if (empty($msg->id)) {
+            $from->send((string)new MessageInvalid());
             return;
         }
 

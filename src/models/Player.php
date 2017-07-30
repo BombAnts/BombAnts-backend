@@ -1,86 +1,33 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: Mathijs
+ * Date: 2017-07-30
+ * Time: 21:01 PM
+ */
 
 namespace bombants\backend\models;
+
 
 use bombants\backend\responses\Response;
 use bombants\backend\value\Token;
 use bombants\backend\value\TokenValue;
-use Ratchet\ConnectionInterface;
 
-class Player
+interface Player
 {
-    /** @var  ConnectionInterface $connection */
-    private $connection;
+    public function getId(): string;
 
-    /** @var  int $id */
-    private $id = null;
+    public function getToken(): TokenValue;
 
-    /** @var  TokenValue $token */
-    private $token = null;
+    public function getName(): string;
 
-    /** @var Game $game */
-    private $game = null;
+    public function isInGame() : bool;
 
-    /**
-     * @param TokenValue $token
-     */
-    public function setToken(TokenValue $token)
-    {
-        $this->token = $token;
-    }
+    public function joinGame(Game $game);
 
-    public function isInGame()
-    {
-        $this->game !== null;
-    }
+    public function leaveGame();
 
-    public function joinGame(Game $game)
-    {
-        $this->game = $game;
-        $game->addPlayer($this);
-    }
+    public function isAuthenticated(Token $token);
 
-    public function removeFromGame()
-    {
-        if (!$this->game instanceof Game) {
-            return true;
-        }
-
-        $this->game->removePlayer($this);
-        $this->game = null;
-    }
-
-    /**
-     * @return int
-     */
-    public function getId(): int
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return TokenValue
-     */
-    public function getToken(): TokenValue
-    {
-        return $this->token;
-    }
-
-    public function __construct(ConnectionInterface $connection, int $id)
-    {
-        $this->id = $id;
-    }
-
-    public function isAuthenticated(Token $token)
-    {
-        if (!$this->token instanceof TokenValue) {
-            return false;
-        }
-        return $this->token->equalsToken($token);
-    }
-
-    public function sendResponse(Response $response)
-    {
-        $this->connection->send((string)$response);
-    }
+    public function sendResponse(Response $response);
 }

@@ -33,7 +33,7 @@ class GamePlayer
         $this->location = $location;
     }
 
-    public function __construct(Player $player)
+    public function __construct(PlayerAuthenticated $player)
     {
         $this->player;
     }

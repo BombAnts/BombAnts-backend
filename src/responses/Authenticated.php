@@ -9,7 +9,7 @@
 namespace bombants\backend\responses;
 
 
-use bombants\backend\models\Player;
+use bombants\backend\models\PlayerAuthenticated;
 
 class Authenticated
 {
@@ -18,7 +18,7 @@ class Authenticated
 
     private $player;
 
-    public function __construct(Player $player)
+    public function __construct(PlayerAuthenticated $player)
     {
         $this->player = $player;
     }
@@ -28,6 +28,7 @@ class Authenticated
         $message = json_encode([
             'code' => $this->code,
             'event' => $this->event,
+            'id' => (string)$this->player->getId(),
             'token' => (string)$this->player->getToken(),
         ]);
         $message = stripslashes($message);
