@@ -1,52 +1,33 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: Mathijs
+ * Date: 2017-07-30
+ * Time: 21:01 PM
+ */
 
 namespace bombants\backend\models;
 
+
+use bombants\backend\responses\Response;
+use bombants\backend\value\Token;
 use bombants\backend\value\TokenValue;
 
-class Player
+interface Player
 {
-    /** @var  int $id */
-    private $id = null;
+    public function getId(): string;
 
-    /** @var  TokenValue $token */
-    private $token = null;
+    public function getToken(): TokenValue;
 
-    /**
-     * @param TokenValue $token
-     */
-    public function setToken(TokenValue $token)
-    {
-        $this->token = $token;
-    }
+    public function getName(): string;
 
-    /**
-     * @return int
-     */
-    public function getId(): int
-    {
-        return $this->id;
-    }
+    public function isInGame() : bool;
 
-    /**
-     * @return TokenValue
-     */
-    public function getToken(): TokenValue
-    {
-        return $this->token;
-    }
+    public function joinGame(Game $game);
 
-    public function __construct(int $id)
-    {
-        $this->id = $id;
-    }
+    public function leaveGame();
 
-    public function isAuthenticated(TokenValue $token)
-    {
-        if (!$this->token instanceof TokenValue) {
-            return false;
-        }
-        return $this->token->equalsToken($token);
-    }
+    public function isAuthenticated(Token $token);
 
+    public function sendResponse(Response $response);
 }

@@ -2,18 +2,18 @@
 /**
  * Created by PhpStorm.
  * User: Mathijs
- * Date: 2017-07-03
- * Time: 20:03 PM
+ * Date: 2017-07-06
+ * Time: 07:17 AM
  */
 
 namespace bombants\backend\responses;
 
 
-class AuthenticatedAlready
+class GameCreateInvalid implements Response
 {
-    private $code = 422;
-    private $event = 'user.alreadyAuthenticated';
-    private $hint = 'Call logout first: {"path" : "/logout", "data" : {}}';
+    private $code = 401;
+    private $event = 'game.createInvalid';
+    private $hint = 'Send JSON in this format: {"path" : "/game/create", "data" : { "name" => "game name"}}';
 
     public function __toString()
     {
