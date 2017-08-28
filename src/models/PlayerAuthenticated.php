@@ -44,7 +44,7 @@ class PlayerAuthenticated  implements Player
 
     public function isInGame() : bool
     {
-        $this->game !== null;
+        return $this->game !== null;
     }
 
     public function joinGame(Game $game)
