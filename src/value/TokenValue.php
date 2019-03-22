@@ -2,17 +2,13 @@
 
 namespace bombants\backend\value;
 
+use Ramsey\Uuid\Exception\InvalidUuidStringException;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
 class TokenValue implements Token
 {
     private $value;
-
-    public function getValue()
-    {
-        return $this->value->toString();
-    }
 
     public static function random()
     {
@@ -22,12 +18,23 @@ class TokenValue implements Token
 
     public static function fromString(string $value)
     {
-        $uuid = Uuid::fromString($value);
-        return new static($uuid);
+        try {
+            $uuid = Uuid::fromString($value);
+            return new static($uuid);
+
+        // if the uuid is invalid
+        } catch (InvalidUuidStringException $e) {
+            return new TokenNull();
+        }
     }
 
     private function __construct(UuidInterface $value) {
         $this->value = $value;
+    }
+
+    public function getValue()
+    {
+        return $this->value->toString();
     }
 
     public function __toString()

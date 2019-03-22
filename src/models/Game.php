@@ -82,6 +82,12 @@ class Game implements \JsonSerializable
 
     }
 
+    public function isPlayerPartOf (PlayerAuthenticated $player): bool {
+        return count(array_map(function ($gamePlayer) use ($player) {
+            return $gamePlayer->getPlayer()->getId() === $player->getId();
+        }, $this->players));
+    }
+
     public function start()
     {
         // TODO set random start positions

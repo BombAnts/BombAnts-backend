@@ -71,9 +71,11 @@ class ServerIO implements MessageComponentInterface
 
         $player = $this->server->getPlayer($playerId);
 
-        $token = !empty($msg->token) ?
-                            TokenValue::fromString($msg->token) :
-                            new TokenNull();
+
+        $token = new TokenNull();
+        if (false === empty($msg->token)) {
+            $token = TokenValue::fromString($msg->token);
+        }
 
         if ($msg->path === '/login') {
             $response = $this->handleLogin($player, $token, $from, $msg);
@@ -144,12 +146,12 @@ class ServerIO implements MessageComponentInterface
 
     private function handleGameJoin(PlayerAuthenticated $player, $msg)
     {
-        if (empty($msg->data->id)) {
+        if (empty($msg->gameId)) {
             $response = new PlayerJoinedGameInvalid();
             return $response;
         }
 
-        $gameId = $msg->data->id;
+        $gameId = $msg->gameId;
 
 
         $game = null; // TODO null object?
@@ -164,6 +166,10 @@ class ServerIO implements MessageComponentInterface
 
         if (!$game instanceof Game) {
             return PlayerJoinedGameNotExist();
+        }
+
+        if ($game->isPlayerPartOf($player)) {
+            return new PlayerJoinedGameAlready();
         }
 
         $gamePlayer = $player->joinGame($game);
