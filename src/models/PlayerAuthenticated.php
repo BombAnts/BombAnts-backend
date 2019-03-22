@@ -47,10 +47,10 @@ class PlayerAuthenticated  implements Player
         return $this->game !== null;
     }
 
-    public function joinGame(Game $game)
+    public function joinGame(Game $game) : GamePlayer
     {
         $this->game = $game;
-        $game->addPlayer($this);
+        return $game->addPlayer($this);
     }
 
     public function leaveGame()
@@ -110,7 +110,7 @@ class PlayerAuthenticated  implements Player
     public function __toArray()
     {
         return [
-            'id' => $this->id,
+            'id' => (string)$this->id,
             'name' => $this->name,
         ];
     }

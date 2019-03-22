@@ -18,6 +18,9 @@ use bombants\backend\responses\AuthenticatedNot;
 use bombants\backend\responses\GameCreated;
 use bombants\backend\responses\GameCreateInvalid;
 use bombants\backend\responses\MessageInvalid;
+use bombants\backend\responses\PlayerJoinedGame;
+use bombants\backend\responses\PlayerJoinedGameInvalid;
+use bombants\backend\responses\PlayerJoinedGameNotExist;
 use bombants\backend\value\Token;
 use bombants\backend\value\TokenNull;
 use bombants\backend\value\TokenValue;
@@ -59,13 +62,11 @@ class ServerIO implements MessageComponentInterface
 
         // if the message can not be decoded
         if (false === is_object($msg)) {
-            $from->send((string)new MessageInvalid());
-            return;
+            return $from->send((string)new MessageInvalid());
         }
 
         if (empty($msg->path)) {
-            $from->send((string)new MessageInvalid());
-            return;
+            return $from->send((string)new MessageInvalid());
         }
 
         $player = $this->server->getPlayer($playerId);
@@ -76,31 +77,31 @@ class ServerIO implements MessageComponentInterface
 
         if ($msg->path === '/login') {
             $response = $this->handleLogin($player, $token, $from, $msg);
-            $from->send((string)$response);
-            return;
+            return $from->send((string)$response);
         }
 
         if (empty($msg->id)) {
-            $from->send((string)new MessageInvalid());
-            return;
+            return $from->send((string)new MessageInvalid());
         }
 
         if (!$player->isAuthenticated($token)) {
             $response = new AuthenticatedNot();
-            $from->send((string)$response);
-            return;
+            return $from->send((string)$response);
         }
 
         if ($msg->path === '/games') {
             $response = $this->handleGameList();
-            $from->send(json_encode($response));
-            return;
+            return $from->send(json_encode($response));
+        }
+
+        if ($msg->path === '/games/join') {
+            $response = $this->handleGameJoin($player, $msg);
+            return $from->send((string)$response);
         }
 
         if ($msg->path === '/games/create') {
             $response = $this->handleGameCreate($player, $msg);
-            $from->send((string)$response);
-            return;
+            return $from->send((string)$response);
         }
 
         echo 'Connection message: '.PHP_EOL;
@@ -112,6 +113,10 @@ class ServerIO implements MessageComponentInterface
     {
         if ($player->isAuthenticated($token)) {
             return new AuthenticatedAlready();
+        }
+
+        if (false === is_object($msg->data)) {
+            return $from->send((string)new MessageInvalid());
         }
 
         $player = new PlayerAuthenticated($from, $msg->data->name);
@@ -137,6 +142,35 @@ class ServerIO implements MessageComponentInterface
         return $result;
     }
 
+    private function handleGameJoin(PlayerAuthenticated $player, $msg)
+    {
+        if (empty($msg->data->id)) {
+            $response = new PlayerJoinedGameInvalid();
+            return $response;
+        }
+
+        $gameId = $msg->data->id;
+
+
+        $game = null; // TODO null object?
+        foreach ($this->games as $gameToJoin) {
+            if ((string)$gameToJoin->getId() !== $gameId) {
+                continue;
+            }
+
+            $game = $gameToJoin;
+            break;
+        }
+
+        if (!$game instanceof Game) {
+            return PlayerJoinedGameNotExist();
+        }
+
+        $gamePlayer = $player->joinGame($game);
+
+        return new PlayerJoinedGame($game, $gamePlayer);
+    }
+
     private function handleGameCreate(PlayerAuthenticated $player, $msg)
     {
         if (empty($msg->data->name)) {
@@ -146,7 +180,7 @@ class ServerIO implements MessageComponentInterface
 
         $game = new Game($player, $msg->data->name);
         $this->games[] = $game;
-        $player->joinGame($game);
+
 
         $response = new GameCreated($game);
         return $response;

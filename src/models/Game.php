@@ -2,9 +2,11 @@
 
 namespace bombants\backend\models;
 
+use bombants\backend\models\rights\CloseGame;
+use bombants\backend\models\rights\StartGame;
 use bombants\backend\value\TokenValue;
 
-class Game
+class Game implements \JsonSerializable
 {
     // config
     private $maxPlayers = 8;
@@ -17,9 +19,6 @@ class Game
 
     /** @var  GameBoard $board */
     private $board;
-
-    /** @var  PlayerAuthenticated $master */
-    private $master;
 
     /** @var  GamePlayer[] $players */
     private $players;
@@ -56,14 +55,26 @@ class Game
     public function __construct(PlayerAuthenticated $player, string $name)
     {
         $this->id = TokenValue::random();
-        $this->master = $player;
+        $this->addGameCreator($player);
         $this->name = $name;
         $this->board = new GameBoardBasic();
     }
 
-    public function addPlayer(PlayerAuthenticated $player)
+    public function addGameCreator(PlayerAuthenticated $player) : GamePlayer
     {
-        $this->players[] = new GamePlayer($player);
+        $gamePlayer = $this->addPlayer($player);
+        $gamePlayer->addRight(new StartGame());
+        $gamePlayer->addRight(new CloseGame());
+        return $gamePlayer;
+    }
+
+
+    public function addPlayer(PlayerAuthenticated $player) : GamePlayer
+    {
+        // TODO what is the player is already in a game ?
+        $gamePlayer = new GamePlayer($player);
+        $this->players[] = $gamePlayer;
+        return $gamePlayer;
     }
 
     public function removePlayer(PlayerAuthenticated $player)
@@ -82,7 +93,12 @@ class Game
         return [
             'id' => (string)$this->getId(),
             'name' => $this->getName(),
-            'master' => $this->master->__toArray(),
+            'players' => $this->players,
         ];
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->__toArray();
     }
 }

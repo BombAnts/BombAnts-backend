@@ -8,55 +8,65 @@
 
 namespace bombants\backend\models;
 
+use bombants\backend\models\rights\Collection;
+use bombants\backend\models\rights\RightsInterface;
+
 /**
  * Used to represent a player in 1 game
  *
  * Class GamePlayer
  * @package bombants\backend\models
  */
-class GamePlayer
+class GamePlayer implements \JsonSerializable
 {
     private $player;
-
-    // player bonusses
-    private $flame = 1;
-    private $fullFlame = false;
-
-    private $numberOfBombs = 1;
-    private $speed = 1;
-
-
     private $location;
+
+    /**
+     * @var Collection
+     */
+    private $rights;
+
+    public function __construct(PlayerAuthenticated $player)
+    {
+        $this->player = $player;
+        $this->rights = new Collection();
+    }
+
+    /**
+     * @return PlayerAuthenticated
+     */
+    public function getPlayer()
+    {
+        return $this->player;
+    }
 
     public function setSpawnPoint(Location $location)
     {
         $this->location = $location;
     }
 
-    public function __construct(PlayerAuthenticated $player)
+
+    public function hasRight(RightsInterface $right): bool
     {
-        $this->player;
+        return $this->rights[$right->getName()] instanceof RightsInterface;
     }
 
-    public function pickedUpFlame()
+    public function addRight(RightsInterface $right)
     {
-        $this->flame += 1;
+        $this->rights->add($right);
     }
 
-    public function pickedUpFullFlame()
+    public function __toArray()
     {
-        $this->fullFlame = true;
+        return [
+            'player' => $this->player->__toArray(),
+            'rights' => $this->rights,
+        ];
     }
 
-    public function pickedUpExtraBomb()
+    public function jsonSerialize()
     {
-        $this->numberOfBombs += 1;
+        return $this->__toArray();
     }
-
-    public function pickedUpSpeed()
-    {
-        $this->speed += 1;
-    }
-
-
 }
