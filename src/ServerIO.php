@@ -19,6 +19,7 @@ use bombants\backend\responses\GameCreated;
 use bombants\backend\responses\GameCreateInvalid;
 use bombants\backend\responses\MessageInvalid;
 use bombants\backend\responses\PlayerJoinedGame;
+use bombants\backend\responses\PlayerJoinedGameAlready;
 use bombants\backend\responses\PlayerJoinedGameInvalid;
 use bombants\backend\responses\PlayerJoinedGameNotExist;
 use bombants\backend\value\Token;
@@ -52,6 +53,8 @@ class ServerIO implements MessageComponentInterface
 
     function onError(ConnectionInterface $conn, \Exception $e)
     {
+        var_dump($e->getMessage());
+        var_dump(get_class($e));
         echo 'Connection error'.PHP_EOL;
     }
 
@@ -165,7 +168,7 @@ class ServerIO implements MessageComponentInterface
         }
 
         if (!$game instanceof Game) {
-            return PlayerJoinedGameNotExist();
+            return new PlayerJoinedGameNotExist();
         }
 
         if ($game->isPlayerPartOf($player)) {
@@ -183,6 +186,8 @@ class ServerIO implements MessageComponentInterface
             $response = new GameCreateInvalid();
             return $response;
         }
+
+        // TODO check if player already in a game?
 
         $game = new Game($player, $msg->data->name);
         $this->games[] = $game;

@@ -83,9 +83,11 @@ class Game implements \JsonSerializable
     }
 
     public function isPlayerPartOf (PlayerAuthenticated $player): bool {
-        return count(array_map(function ($gamePlayer) use ($player) {
+        $result = array_filter($this->players, function ($gamePlayer) use ($player) {
             return $gamePlayer->getPlayer()->getId() === $player->getId();
-        }, $this->players));
+        });
+
+        return count($result) !== 0;
     }
 
     public function start()
