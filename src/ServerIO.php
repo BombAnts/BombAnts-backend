@@ -99,14 +99,20 @@ class ServerIO implements MessageComponentInterface
             return $from->send(json_encode($response));
         }
 
-        if ($msg->path === '/games/join') {
-            $response = $this->handleGameJoin($player, $msg);
-            return $from->send((string)$response);
-        }
+        if ($msg->path === '/games/join' || $msg->path === '/games/create') {
+            if ($player->isInGame()) {
+                return $from->send(new PlayerJoinedGameAlready());
+            }
 
-        if ($msg->path === '/games/create') {
-            $response = $this->handleGameCreate($player, $msg);
-            return $from->send((string)$response);
+            if ($msg->path === '/games/join') {
+                $response = $this->handleGameJoin($player, $msg);
+                return $from->send((string)$response);
+            }
+
+            if ($msg->path === '/games/create') {
+                $response = $this->handleGameCreate($player, $msg);
+                return $from->send((string)$response);
+            }
         }
 
         echo 'Connection message: '.PHP_EOL;

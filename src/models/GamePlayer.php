@@ -59,10 +59,12 @@ class GamePlayer implements \JsonSerializable
 
     public function __toArray()
     {
-        return [
-            'player' => $this->player->__toArray(),
-            'rights' => $this->rights,
-        ];
+        $gamePlayer = ['player' => $this->player->__toArray()];
+
+        if (count($this->rights) > 0) {
+            $gamePlayer['rights'] = $this->rights;
+        }
+        return $gamePlayer;
     }
 
     public function jsonSerialize()
