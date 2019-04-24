@@ -62,7 +62,8 @@ class Game implements \JsonSerializable
 
     public function addGameCreator(PlayerAuthenticated $player) : GamePlayer
     {
-        $gamePlayer = $this->addPlayer($player);
+
+        $gamePlayer = $player->joinGame($this);
         $gamePlayer->addRight(new StartGame());
         $gamePlayer->addRight(new CloseGame());
         return $gamePlayer;
@@ -90,11 +91,6 @@ class Game implements \JsonSerializable
         return count($result) !== 0;
     }
 
-    public function start()
-    {
-        // TODO set random start positions
-        // Start the game
-    }
 
     public function __toArray()
     {

@@ -9,7 +9,7 @@
 namespace bombants\backend\responses;
 
 
-class AuthenticatedAlready
+class AuthenticatedAlready implements Response
 {
     private $code = 422;
     private $event = 'user.alreadyAuthenticated';

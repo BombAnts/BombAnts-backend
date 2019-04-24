@@ -8,7 +8,7 @@
 
 namespace bombants\backend\models\rights;
 
-class Collection implements \IteratorAggregate, \JsonSerializable
+class Collection implements \IteratorAggregate, \JsonSerializable, \Countable
 {
 
     private $rights = [];
@@ -32,4 +32,8 @@ class Collection implements \IteratorAggregate, \JsonSerializable
         return $this->rights;
     }
 
+    public function count()
+    {
+        return count($this->rights);
+    }
 }

@@ -50,11 +50,6 @@ class PlayerNull implements Player
         return false;
     }
 
-    public function sendResponse(Response $response)
-    {
-
-    }
-
     public function __toArray() : array
     {
         return [];

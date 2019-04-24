@@ -9,8 +9,6 @@
 namespace bombants\backend\models;
 
 
-use bombants\backend\models\rights\RightsInterface;
-use bombants\backend\responses\Response;
 use bombants\backend\value\Token;
 use bombants\backend\value\TokenValue;
 
@@ -29,6 +27,4 @@ interface Player
     public function leaveGame();
 
     public function isAuthenticated(Token $token);
-
-    public function sendResponse(Response $response);
 }

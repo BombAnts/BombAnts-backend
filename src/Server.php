@@ -16,9 +16,6 @@ class Server
     /** @var  IoServer $server */
     private $server = null;
 
-    private $games;
-
-    private $players = [];
 
     public function __construct()
     {
@@ -32,25 +29,6 @@ class Server
     public function start()
     {
         $this->server->run();
-    }
-
-    public function addPlayer(PlayerAuthenticated $player)
-    {
-        $this->players[$player->getId()] = $player;
-    }
-
-    public function getPlayer($id = null) : Player
-    {
-        if ($id === null || !array_key_exists($id, $this->players)) {
-            return new PlayerNull();
-        }
-
-        return $this->players[$id];
-    }
-
-    public function getPlayerCount()
-    {
-        return count($this->players);
     }
 }
 

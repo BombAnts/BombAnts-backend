@@ -2,16 +2,11 @@
 
 namespace bombants\backend\models;
 
-use bombants\backend\responses\Response;
 use bombants\backend\value\Token;
 use bombants\backend\value\TokenValue;
-use Ratchet\ConnectionInterface;
 
 class PlayerAuthenticated  implements Player
 {
-    /** @var  ConnectionInterface $connection */
-    private $connection;
-
     /** @var  int $id */
     private $id = null;
 
@@ -85,10 +80,8 @@ class PlayerAuthenticated  implements Player
     }
 
 
-    public function __construct(ConnectionInterface $connection, string $name)
+    public function __construct(string $name)
     {
-        $this->connection = $connection;
-
         $this->id = TokenValue::random();
         $this->token = TokenValue::random();
         $this->name = $name;
@@ -100,11 +93,6 @@ class PlayerAuthenticated  implements Player
             return false;
         }
         return $this->token->equalsToken($token);
-    }
-
-    public function sendResponse(Response $response)
-    {
-        $this->connection->send((string)$response);
     }
 
     public function __toArray()

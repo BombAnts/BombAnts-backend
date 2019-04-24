@@ -11,7 +11,7 @@ namespace bombants\backend\responses;
 
 use bombants\backend\models\PlayerAuthenticated;
 
-class Authenticated
+class Authenticated implements Response
 {
     private $code = 200;
     private $event = 'user.authenticated';

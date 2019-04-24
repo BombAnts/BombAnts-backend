@@ -12,6 +12,7 @@ namespace bombants\backend;
 use bombants\backend\models\Game;
 use bombants\backend\models\Player;
 use bombants\backend\models\PlayerAuthenticated;
+use bombants\backend\models\PlayerNull;
 use bombants\backend\responses\Authenticated;
 use bombants\backend\responses\AuthenticatedAlready;
 use bombants\backend\responses\AuthenticatedNot;
@@ -36,18 +37,23 @@ class ServerIO implements MessageComponentInterface
     /** @var Game[] $games */
     private $games = [];
 
+    private $playerConnections = null;
+
     public function __construct(Server $server)
     {
         $this->server = $server;
+        $this->playerConnections = new \SplObjectStorage();
     }
 
     function onOpen(ConnectionInterface $conn)
     {
-        echo 'Connection opened'.PHP_EOL;
+        $this->playerConnections->attach($conn, new PlayerNull());
+        echo 'Connection open'.PHP_EOL;
     }
 
     function onClose(ConnectionInterface $conn)
     {
+        $this->playerConnections->detach($conn);
         echo 'Connection closed'.PHP_EOL;
     }
 
@@ -72,12 +78,15 @@ class ServerIO implements MessageComponentInterface
             return $from->send((string)new MessageInvalid());
         }
 
-        $player = $this->server->getPlayer($playerId);
-
-
         $token = new TokenNull();
         if (false === empty($msg->token)) {
             $token = TokenValue::fromString($msg->token);
+        }
+
+        $player = $this->playerConnections->offsetGet($from);
+        // if the authentication token is not correct we have an unauthenticated user
+        if ($token instanceof Token && false === $player->isAuthenticated($token)) {
+            $player = new PlayerNull();
         }
 
         if ($msg->path === '/login') {
@@ -120,18 +129,18 @@ class ServerIO implements MessageComponentInterface
         var_dump($msg);
     }
 
-    private function handleLogin(Player $player, Token $token, ConnectionInterface $from, $msg)
+    private function handleLogin(Player $player, Token $token, $from, $msg)
     {
         if ($player->isAuthenticated($token)) {
             return new AuthenticatedAlready();
         }
 
         if (false === is_object($msg->data)) {
-            return $from->send((string)new MessageInvalid());
+            return new MessageInvalid();
         }
 
-        $player = new PlayerAuthenticated($from, $msg->data->name);
-        $this->server->addPlayer($player);
+        $player = new PlayerAuthenticated($msg->data->name);
+        $this->playerConnections->offsetSet($from, $player);
 
         return new Authenticated($player);
     }
