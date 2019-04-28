@@ -9,6 +9,11 @@
 namespace bombants\backend;
 
 
+use bombants\backend\commands\AuthenticateCommand;
+use bombants\backend\commands\Command;
+use bombants\backend\commands\GameCreateCommand;
+use bombants\backend\commands\GameJoinCommand;
+use bombants\backend\commands\GameListCommand;
 use bombants\backend\models\Game;
 use bombants\backend\models\Player;
 use bombants\backend\models\PlayerAuthenticated;
@@ -53,6 +58,10 @@ class ServerIO implements MessageComponentInterface
 
     function onClose(ConnectionInterface $conn)
     {
+        /** @var Player $player */
+        $player = $this->playerConnections->offsetGet($conn);
+        $player->leaveGame();
+
         $this->playerConnections->detach($conn);
         echo 'Connection closed'.PHP_EOL;
     }
@@ -89,39 +98,30 @@ class ServerIO implements MessageComponentInterface
             $player = new PlayerNull();
         }
 
-        if ($msg->path === '/login') {
-            $response = $this->handleLogin($player, $token, $from, $msg);
+
+        $commands = [
+            AuthenticateCommand::class,
+            GameListCommand::class,
+            GameJoinCommand::class,
+            GameCreateCommand::class,
+        ];
+
+        $response = null;
+        foreach($commands as $commandClass) {
+            /** @var Command $command */
+            $command = new $commandClass($player, $this->games);
+            if (!$command->shouldRun($msg)) {
+                unset($command);
+                continue;
+            }
+
+            $response = $command->run($msg);
+            $player = $command->getPlayer();
+        }
+
+        if ($response !== null) {
+            $this->playerConnections->offsetSet($from, $player);
             return $from->send((string)$response);
-        }
-
-        if (empty($msg->id)) {
-            return $from->send((string)new MessageInvalid());
-        }
-
-        if (!$player->isAuthenticated($token)) {
-            $response = new AuthenticatedNot();
-            return $from->send((string)$response);
-        }
-
-        if ($msg->path === '/games') {
-            $response = $this->handleGameList();
-            return $from->send(json_encode($response));
-        }
-
-        if ($msg->path === '/games/join' || $msg->path === '/games/create') {
-            if ($player->isInGame()) {
-                return $from->send(new PlayerJoinedGameAlready());
-            }
-
-            if ($msg->path === '/games/join') {
-                $response = $this->handleGameJoin($player, $msg);
-                return $from->send((string)$response);
-            }
-
-            if ($msg->path === '/games/create') {
-                $response = $this->handleGameCreate($player, $msg);
-                return $from->send((string)$response);
-            }
         }
 
         echo 'Connection message: '.PHP_EOL;
@@ -129,71 +129,7 @@ class ServerIO implements MessageComponentInterface
         var_dump($msg);
     }
 
-    private function handleLogin(Player $player, Token $token, $from, $msg)
-    {
-        if ($player->isAuthenticated($token)) {
-            return new AuthenticatedAlready();
-        }
 
-        if (false === is_object($msg->data)) {
-            return new MessageInvalid();
-        }
-
-        $player = new PlayerAuthenticated($msg->data->name);
-        $this->playerConnections->offsetSet($from, $player);
-
-        return new Authenticated($player);
-    }
-
-    private function handleGameList()
-    {
-        $result = [
-            'event' => 'game.list',
-            'data' => []
-        ];
-        foreach($this->games as $game) {
-            $result['data'][] = [
-                'id' => (string)$game->getId(),
-                'name' => $game->getName(),
-                'amountPlayers' => $game->getAmountOfPlayers(),
-                'maxPlayers' => $game->getMaxPlayers(),
-            ];
-        }
-        return $result;
-    }
-
-    private function handleGameJoin(PlayerAuthenticated $player, $msg)
-    {
-        if (empty($msg->gameId)) {
-            $response = new PlayerJoinedGameInvalid();
-            return $response;
-        }
-
-        $gameId = $msg->gameId;
-
-
-        $game = null; // TODO null object?
-        foreach ($this->games as $gameToJoin) {
-            if ((string)$gameToJoin->getId() !== $gameId) {
-                continue;
-            }
-
-            $game = $gameToJoin;
-            break;
-        }
-
-        if (!$game instanceof Game) {
-            return new PlayerJoinedGameNotExist();
-        }
-
-        if ($game->isPlayerPartOf($player)) {
-            return new PlayerJoinedGameAlready();
-        }
-
-        $gamePlayer = $player->joinGame($game);
-
-        return new PlayerJoinedGame($game, $gamePlayer);
-    }
 
     private function handleGameCreate(PlayerAuthenticated $player, $msg)
     {
