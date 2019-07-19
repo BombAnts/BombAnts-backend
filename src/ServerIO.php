@@ -92,6 +92,7 @@ class ServerIO implements MessageComponentInterface
             $token = TokenValue::fromString($msg->token);
         }
 
+        /** @var Player $player */
         $player = $this->playerConnections->offsetGet($from);
         // if the authentication token is not correct we have an unauthenticated user
         if ($token instanceof Token && false === $player->isAuthenticated($token)) {
@@ -108,6 +109,7 @@ class ServerIO implements MessageComponentInterface
 
         $response = null;
         foreach($commands as $commandClass) {
+            // TODO factory?
             /** @var Command $command */
             $command = new $commandClass($player, $this->games);
             if (!$command->shouldRun($msg)) {
@@ -116,11 +118,20 @@ class ServerIO implements MessageComponentInterface
             }
 
             $response = $command->run($msg);
-            $player = $command->getPlayer();
+
+            // side effects
+            if($response instanceof Authenticated) {
+                $this->playerAuthenticated($from, $command);
+            }
+            if ($response instanceof GameCreated) {
+                $this->gameCreate($from, $command);
+            }
+            if ($response instanceof GameJoinCommand) {
+                $this->gameJoined($from, $command);
+            }
         }
 
         if ($response !== null) {
-            $this->playerConnections->offsetSet($from, $player);
             return $from->send((string)$response);
         }
 
@@ -129,22 +140,29 @@ class ServerIO implements MessageComponentInterface
         var_dump($msg);
     }
 
+    // TODO automate side effects
+    private function playerAuthenticated($from, AuthenticateCommand $authenticateCommand) {
+        $this->playerConnections->offsetSet($from, $authenticateCommand->getPlayer());
+    }
 
+    private function gameCreate($from, GameCreateCommand $gameCreate) {
+        $this->playerConnections->offsetSet($from, $gameCreate->getPlayer());
+        $this->games[] = $gameCreate->getGame();
+    }
 
-    private function handleGameCreate(PlayerAuthenticated $player, $msg)
-    {
-        if (empty($msg->data->name)) {
-            $response = new GameCreateInvalid();
-            return $response;
+    private function gameJoined($from, GameJoinCommand $command) {
+        $this->playerConnections->offsetSet($from, $command->getPlayer());
+
+        // this will not work when 2 players join at the same time
+        foreach ($this->games as $id => $gameToJoin) {
+            if ((string)$gameToJoin->getId() !== $command->getGame()->getId()) {
+                continue;
+            }
+
+            $this->games[$id] = $command->getGame();
+            break;
         }
 
-        // TODO check if player already in a game?
 
-        $game = new Game($player, $msg->data->name);
-        $this->games[] = $game;
-
-
-        $response = new GameCreated($game);
-        return $response;
     }
 }

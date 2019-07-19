@@ -10,7 +10,6 @@ use bombants\backend\responses\GameCreated;
 use bombants\backend\responses\GameCreateInvalid;
 use bombants\backend\responses\MessageInvalid;
 use bombants\backend\responses\PlayerJoinedGameAlready;
-use bombants\backend\responses\PlayerJoinedGameInvalid;
 
 class GameCreateCommand implements Command
 {
@@ -19,6 +18,10 @@ class GameCreateCommand implements Command
      */
     private $player;
 
+    /**
+     * @var Game
+     */
+    private $game;
 
     public function __construct(Player $player)
     {
@@ -28,6 +31,11 @@ class GameCreateCommand implements Command
     public function getPlayer(): Player
     {
         return $this->player;
+    }
+
+    public function getGame(): Game
+    {
+        return $this->game;
     }
 
     public function shouldRun(\stdClass $message)
@@ -58,6 +66,8 @@ class GameCreateCommand implements Command
         }
 
         $game = new Game($this->player, $message->data->name);
+        $this->game = $game;
+
         return new GameCreated($game);
     }
 }

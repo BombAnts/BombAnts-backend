@@ -22,6 +22,10 @@ class GameJoinCommand implements Command
      * @var Game[]
      */
     private $games;
+    /**
+     * @var Game
+     */
+    private $game;
 
     public function __construct(Player $player,array $games)
     {
@@ -30,6 +34,12 @@ class GameJoinCommand implements Command
     }
 
     public function getPlayer(): Player
+    {
+        return $this->player;
+    }
+
+
+    public function getGame(): Player
     {
         return $this->player;
     }
@@ -84,6 +94,7 @@ class GameJoinCommand implements Command
         }
 
         $gamePlayer = $this->player->joinGame($game);
+        $this->games = $game;
 
         return new PlayerJoinedGame($game, $gamePlayer);
     }

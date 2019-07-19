@@ -6,6 +6,7 @@ use bombants\backend\models\Game;
 use bombants\backend\models\Player;
 use bombants\backend\models\PlayerAuthenticated;
 use bombants\backend\responses\AuthenticatedNot;
+use bombants\backend\responses\GameList;
 use bombants\backend\responses\MessageInvalid;
 
 class GameListCommand implements Command
@@ -41,18 +42,7 @@ class GameListCommand implements Command
             return new AuthenticatedNot();
         }
 
-        $result = [
-            'event' => 'game.list',
-            'data' => []
-        ];
-        foreach($this->games as $game) {
-            $result['data'][] = [
-                'id' => (string)$game->getId(),
-                'name' => $game->getName(),
-                'amountPlayers' => $game->getAmountOfPlayers(),
-                'maxPlayers' => $game->getMaxPlayers(),
-            ];
-        }
-        return $result;
+
+        return new GameList($this->games);
     }
 }
