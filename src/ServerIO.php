@@ -44,16 +44,14 @@ class ServerIO implements MessageComponentInterface
 
     private $playerConnections = null;
 
-    public function __construct(Server $server)
+    public function __construct()
     {
-        $this->server = $server;
         $this->playerConnections = new \SplObjectStorage();
     }
 
     function onOpen(ConnectionInterface $conn)
     {
         $this->playerConnections->attach($conn, new PlayerNull());
-        echo 'Connection open'.PHP_EOL;
     }
 
     function onClose(ConnectionInterface $conn)
@@ -63,7 +61,6 @@ class ServerIO implements MessageComponentInterface
         $player->leaveGame();
 
         $this->playerConnections->detach($conn);
-        echo 'Connection closed'.PHP_EOL;
     }
 
     function onError(ConnectionInterface $conn, \Exception $e)

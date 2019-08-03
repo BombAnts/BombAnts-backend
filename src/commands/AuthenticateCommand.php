@@ -37,7 +37,10 @@ class AuthenticateCommand implements Command
             return new AuthenticatedAlready();
         }
 
-        if (false === is_object($message->data)) {
+        if (
+            false === property_exists($message, 'data')
+            || false === is_object($message->data)
+        ) {
             return new MessageInvalid();
         }
 

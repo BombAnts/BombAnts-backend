@@ -11,7 +11,7 @@ use Ratchet\WebSocket\WsServer;
 
 require '../vendor/autoload.php';
 
-class Server
+class ServerExample
 {
     /** @var  IoServer $server */
     private $server = null;
@@ -19,7 +19,7 @@ class Server
 
     public function __construct()
     {
-        $ws = new WsServer(new ServerIO($this));
+        $ws = new WsServer(new ServerIO());
         $ws->disableVersion(0); // old, bad, protocol version
 
         // Make sure you're running this as root
@@ -33,5 +33,5 @@ class Server
 }
 
 
-$server = new Server();
+$server = new ServerExample();
 $server->start();
